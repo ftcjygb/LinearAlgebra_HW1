@@ -11,7 +11,7 @@ def test_consistency(augmented_RREF):
     # A system is inconsistent if and only if a row in the RREF looks like [0 0 ... 0 | b_i] 
     # where b_i != 0. 
     # Return False if inconsistent 
-    zero_thresh = 1e-5
+    zero_thresh = 1e-6
     for i in range(rows):
         is_zero_row = True
         for j in range(cols - 1):
@@ -33,16 +33,14 @@ def generate_solution(augmented_RREF):
     
     # TODO: Identify pivot columns
     # Hint: Find the first nonzero in each row
-    zero_thresh = 1e-5
+    zero_thresh = 1e-6
     
     # TODO: Calculate basic variables
     # Hint: Note that we have assume all free variables are set to 1
     for i in range(rows):
         for j in range(num_vars):
             if torch.abs(augmented_RREF[i, j]) > zero_thresh:
-                # Pivot found at column j
                 b_val = augmented_RREF[i, -1].item()
-                # Subtract the contribution of the free variables (which are 1)
                 for k in range(j + 1, num_vars):
                     b_val -= augmented_RREF[i, k].item() * 1.0
                 solution[j, 0] = b_val

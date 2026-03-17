@@ -57,18 +57,15 @@ def gauss_elimination(A):
     # TODO: Implement step 1 to step 4 in the lecture slides (the forward phase to Row Echelon Form) 
     # Hint: You should use our custom row_interchange, row_scaling, row_addition funtions
     while pivot_row < rows and pivot_col < cols:
-        # Step 1: Find pivot
         max_idx = pivot_row + torch.argmax(torch.abs(R[pivot_row:rows, pivot_col]))
         if torch.abs(R[max_idx, pivot_col]) < zero_thresh:
             R[max_idx, pivot_col] = 0.0
             pivot_col += 1
             continue
             
-        # Step 2: Swap rows if necessary
         if max_idx != pivot_row:
             R = row_interchange(R, pivot_row, int(max_idx))
             
-        # Step 3 & 4: Eliminate entries below pivot
         for i in range(pivot_row + 1, rows):
             if torch.abs(R[i, pivot_col]) > zero_thresh:
                 factor = -R[i, pivot_col] / R[pivot_row, pivot_col]
@@ -81,19 +78,16 @@ def gauss_elimination(A):
     # Hint: You should use our custom row_interchange, row_scaling, row_addition funtions
     for i in range(rows - 1, -1, -1):
         pivot_idx = -1
-        # Find the pivot column for the current row
         for j in range(cols):
             if torch.abs(R[i, j]) > zero_thresh:
                 pivot_idx = j
                 break
                 
         if pivot_idx != -1:
-            # Step 5: Scale the pivot to 1
             val = R[i, pivot_idx].item()
             if abs(val - 1.0) > zero_thresh:
                 R = row_scaling(R, i, 1.0 / val)
                 
-            # Step 6: Eliminate entries above pivot
             for k in range(i - 1, -1, -1):
                 if torch.abs(R[k, pivot_idx]) > zero_thresh:
                     factor = -R[k, pivot_idx]

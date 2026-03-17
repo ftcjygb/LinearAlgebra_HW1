@@ -1,4 +1,5 @@
 import torch
+import time # 計時用的!
 from linear_solver import solve_linear_equations
 from matrices_vectors import matrix_vector_product, matrix_sum, scalar_matrix
 
@@ -24,6 +25,43 @@ def run_test(A, b, test_name):
         error_norm = torch.norm(error_vec).item()
         print(f"L2 Norm of Error (||Ax - b||): {error_norm:.6e}\n")
 
+def run_test_with_timing(A, b, test_name):
+    """
+    額外新增的函數：專門用來執行測試並計算求解時間，
+    不影響原本 run_test 的架構。
+    """
+    print(f"--- Timing Test: {test_name} ---")
+    rows, cols = A.shape
+    print(f"Matrix Dimension: {rows}x{cols}")
+    
+    # 記錄開始時間
+    start_time = time.perf_counter()
+    
+    # 執行求解
+    x = solve_linear_equations(A, b)
+    
+    # 記錄結束時間並計算耗時
+    end_time = time.perf_counter()
+    execution_time = end_time - start_time
+    
+    if x is None:
+        print("Result: No Solution (Inconsistent)\n")
+    else:
+        print("Result: Solution Vector x (showing head and tail):")
+        if x.shape[0] > 10:
+            print(f"[{x[0, 0]:.4f}, {x[1, 0]:.4f}, {x[2, 0]:.4f}, ..., {x[-1, 0]:.4f}]^T")
+        else:
+            print(x)
+            
+        # 計算誤差 (使用你自訂的函數)
+        Ax = matrix_vector_product(A, x)
+        neg_b = scalar_matrix(-1.0, b)
+        error_vec = matrix_sum(Ax, neg_b)
+        error_norm = torch.norm(error_vec).item()
+        
+        print(f"L2 Norm of Error (||Ax - b||): {error_norm:.6e}")
+        
+    print(f"⏱️ Execution Time: {execution_time:.4f} seconds\n")
 
 # 1. Define Test Data (4 equations, 4 unknowns)
 # Case 1: Consistent System (Unique solution or Infinite)
@@ -98,9 +136,11 @@ if __name__ == "__main__":
     run_test(A_consistent, b_consistent, "Consistent Case")
     run_test(A_inconsistent, b_inconsistent, "Inconsistent Case")
 
-    print("====== BONUS: Robustness & Scalability Tests ======\n")
+    print("============== BONUS ==============\n")
     run_test(A_minimal, b_minimal, "Minimal 3x3 Case")
-    run_test(A_under, b_under, "Underdetermined 3x5 (Fat Matrix)")
-    run_test(A_over_c, b_over_c, "Overdetermined 5x3 Consistent (Tall Matrix)")
-    run_test(A_over_c, b_over_i, "Overdetermined 5x3 Inconsistent (Tall Matrix)")
+    run_test(A_under, b_under, "Underdetermined 3x5 Case")
+    run_test(A_over_c, b_over_c, "Overdetermined 5x3 Consistent Case")
+    run_test(A_over_c, b_over_i, "Overdetermined 5x3 Inconsistent Case")
     run_test(A_large, b_large, "Large Scale 100x100 Matrix")
+
+    run_test_with_timing(A_large, b_large, "Large Scale 100x100 Matrix")

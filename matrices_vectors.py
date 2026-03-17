@@ -30,16 +30,12 @@ def matrix_vector_product(M, vec):
     # TODO: Complete the functionality by implementing a for loop for a general linear combination.
     # Hint: Utilize the scalar_matrix() and matrix_sum() functions.
     for j in range(cols):
-        # Extract column j from M
         col_j = torch.zeros((rows, 1), dtype=torch.float32)
         for i in range(rows):
             col_j[i, 0] = M[i, j]
             
-        # Scale the column by the corresponding vector element
         weight = vec[j, 0].item()
         scaled_col = scalar_matrix(weight, col_j)
-        
-        # Add to the running sum
         vec2 = matrix_sum(vec2, scaled_col)
     
     return vec2
